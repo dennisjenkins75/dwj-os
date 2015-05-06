@@ -1,0 +1,8 @@
+2007-06-28: Dragoniz3r, irc #osdev
+2007-06-29: zach, irc #osdev, supplied me /w his kernel code.
+2007-07-06: mwk (Marcin Koscielnicki) helped me tremendously with 
+	GNU ld script and grub booting. irc://freenode/#osdev
+
+2007-12-21: Used free ATA sample code on www.ata-atapi.com from
+	Hale Landis for creating my first IDE device driver.
+

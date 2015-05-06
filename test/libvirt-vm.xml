@@ -1,0 +1,55 @@
+<domain type='kvm'>
+  <name>dwj-dwjos-iso</name>
+  <memory unit='KiB'>16384</memory>
+  <currentMemory unit='KiB'>16384</currentMemory>
+  <vcpu placement='static'>1</vcpu>
+  <os>
+    <type arch='i686' machine='pc-1.0'>hvm</type>
+    <boot dev='fd'/>
+  </os>
+  <cpu mode='custom' match='exact'>
+    <model fallback='allow'>pentium</model>
+  </cpu>
+  <clock offset='localtime'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='/vm/pool0/dwj-dwjos.iso'/>
+      <target dev='hdc' bus='ide'/>
+      <readonly/>
+      <address type='drive' controller='0' bus='1' target='0' unit='0'/>
+    </disk>
+    <controller type='ide' index='0'>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
+    </controller>
+    <controller type='usb' index='0'>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x2'/>
+    </controller>
+    <controller type='fdc' index='0'/>
+    <controller type='pci' index='0' model='pci-root'/>
+    <interface type='bridge'>
+      <mac address='82:00:00:00:00:0f'/>
+      <source bridge='br0'/>
+      <model type='rtl8139'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
+    </interface>
+    <parallel type='file'>
+      <source path='/tmp/lpt1.out'/>
+      <target port='0'/>
+    </parallel>
+    <input type='mouse' bus='ps2'/>
+    <input type='keyboard' bus='ps2'/>
+    <graphics type='vnc' port='15915' autoport='no'>
+      <listen type='address'/>
+    </graphics>
+    <video>
+      <model type='cirrus' vram='16384' heads='1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
+    </video>
+    <memballoon model='none'/>
+  </devices>
+</domain>

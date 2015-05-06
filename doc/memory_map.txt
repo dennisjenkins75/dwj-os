@@ -1,0 +1,114 @@
+Virtual memory map (as of 2007-12-12):
+
+The memory map is controlled by the linker script ("kernel-elf.lds")
+The regions below are initially mapped by the ".setup.text" code.
+After the main kernel starts up, ".setup" will be unmapped.
+
+start		end
+=========	=========
+0000,0000	000f,ffff	1:1 mapping of BIOS. (REMOVED)
+
+0010,0000			.setup, while it is executing.
+				Will be unmapped after done executing.
+
+0000,0000	efff,ffff	undefined so far.
+
+f000,0000	f00f,ffff	First 1M of physical RAM. (REMOVED)
+
+f010,0000			kernel: .setup, .text, .data, .bss
+
+f100,0000	feff,ffff	kernel heap
+
+ff00,0000			VGA VRAM (enough pages for 80x50 display).		
+
+ff40,0000			Kernel stack (64K)
+
+ff80,0000			Temp addresses (used to quickly map physical pages).
+
+ffc0,0000	ffff,ffff	kernel page tables.  page dir = ffff,f000
+
+-------------  Changes to make:
+
+1) In start.S, move the stack to 0xffb0,0000 and make it 64K.
+   (ends at 0xffb0,ffff).  Place guard page on either end.
+
+2) Remap BIOS VGA to 0xffa0,0000 (ends at 0xffa3,ffff) (256K)
+
+3) Unmap first 1M of BIOS.  Want 0000,0000 to be a nice guard page
+   for catching NULL pointer dereferences.
+
+4) Map GRUB loaded modules someplace useful.  Hopefully we can map them
+   to 0xf200,0000 and they will fit.
+
+
+==============================================================
+
+Exmaple kernel ELF memory map:
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+
+  0 .setup        00000b4c  00100000  00100000  00001000  2**2
+                  CONTENTS, ALLOC, LOAD, CODE
+
+  1 .text         000035fb  f0101000  00101000  00002000  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+
+  2 .data         00000120  f0105000  00105000  00006000  2**5
+                  CONTENTS, ALLOC, LOAD, DATA
+
+  3 .bss          000069a8  f0106000  00106000  00006120  2**12
+                  ALLOC
+
+================================================================
+
+
+
+
+================================================================
+
+Notes:
+
+1) .setup executes first.  It sets up the initial page tables to
+   map the kernel high, then starts the kernel proper.
+
+2) The memory pages taken by .setup will be reused by the kernel
+   for something else later.
+
+3) .setup will create the following virtual memory map:
+
+   3a) 'Identity map' the bottom 1M (set virtual = physical).
+	This mapping will stay even after the kernel is up and running.
+
+   3b) 'Identity map' the kernel itself, so that we can use its
+	stack and store our results in its .data section.
+
+   3c) Map BIOS (bottom 1M ram) to "_kernel_virtual" (see linker script),
+	generally this is to '0xf0000000'.
+
+   3d) Map the kernel itself to right above BIOS (generally to 0xf0100000).
+
+   3e) Create a linked list of all remaining physical RAM pages.
+
+   3f) Stuff a lot of pre-computed memory pointers into .data from .setup.
+
+4) PDE / PTE:
+
+   4a) The kernel's PD (page directory, what "%cr3" points to) is part of 
+	the kernel's .bss segment.  It is mapped at link time into the kernel.
+	The last PDE in the PD will point to itself, so that it also doubles
+	as a PT.  This way I can access all of the page tables as if
+	they were already mapped.  This gets confusing.
+	http://www.osdev.org/phpBB2/viewtopic.php?t=14440
+
+   4b) The page tables PTE for the kernel are virtually mapped to the high-end
+       of virtual memory (0xffc00000 and up).  Physically, they are
+       allocated from the kernel's physical memory manager, pmm_alloc().
+
+   4c) Not sure yet where to put the PTs for user-mode processes.
+
+   4d) .setup will allocate a few pages to hold the initial mappings
+	directly above the last grub loaded module.
+
+
+==============================================

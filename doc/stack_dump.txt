@@ -1,0 +1,21 @@
+2007-12-17
+
+This is how I plan to help the kernel dump its own stack symbolically:
+
+1) GNU Linker produces a map file (tmp/kernel.map).
+
+2) Perl script converts map file into C header file (tmp/map_temp.inc)
+
+3) C code (tools/makemap.c) includes this header.  Produces a binary
+   that runs on the host platform.
+
+4) This binary dumps processes the array from the map_temp.inc file into
+   a compact binary table and stores it in a disk file on the host.
+
+5) This table is included in the boot image and loaded as a module via grub.
+
+6) Setup code will locate this module and map it into virtual address space
+   in the running kernel.
+
+7) Stack dump routine in the kernel can use the data table to resolve virtual
+   addresses into symbolc names.

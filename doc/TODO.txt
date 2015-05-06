@@ -1,0 +1,77 @@
+Generic project plan:
+
+* Make task kstack a seperate page, with guard pages on bottom side to catch stack
+ over-runs.
+
+
+* Implement linux-console like US keyboard map.
+	* Store keystrokes in small buffer.
+	* Write a small driver where the kernel can get the next
+		keystroke via polling.  Main use is for the kernel
+		debugger.
+	* "int kdb_getchar(void)" // returns 0 if no chars.
+
+* Implement kernel mode debugger:
+	* Enter by hitting CTRL-BREAK.
+	* Commands for:
+		* Dump ram as hex / text
+		* Dump regs
+		* Dump paging data
+		* Dump as assembly :)
+		* Map / Ummap phys <-> virtual ram.
+
+* Build physical memory map.
+	* Locate all multiboot data.
+		* Kernel and modules stay put.
+		* command line and mmap get copied into kernel .bss
+		* can temporarily copy into < 1M ram space, then
+			dynamically allocate and copy back into kernel heap.
+	* enumerate PCI bus, add to physical memory map.
+
+* Build physical memory mamanger.
+	* Break real-mode (< 1M) RAM into 64K chunks.
+	* Break p-mode RAM into 4M chunks if we can (for 4M page tables).
+	* Remaining p-mode RAM into 4K chunks.
+	* Allocator takes flags:
+		* MM_BIOS
+		* MM_NO_FAIL
+		* MM_IRQ_LEVEL
+		* MM_4M
+		* MM_PAGABLE ??
+	* Ability to specify contiguous pages.
+	* Allocate in 4K pages.
+	* If no free 4K pages, split a 4M page.
+	* Merge free 4K pages into 4M page if possible?
+
+* Build kernel virtual memory manager.
+	* Code to map and unmap physical to virtual memory.
+		kmemmap(void *phys, void *virt, int pages);
+		* Should update / trim page tables as needed.
+
+* Build kernal heap manager.
+	* "void *kmalloc(int bytes, int flags)"
+	* "void kfree(void *p)"
+	* Flags: "FIXED (not swappable)"
+
+* Loadable kernel modules, at least boot-time elf/grub support.
+	* All device drivers will be modules.
+	* Need to understand ELF file format, and how to dynamically link
+		a loaded module into the kernel.
+	* Verify kernel exports only certain symbols.
+
+* Low-level device drivers:
+	* PCI bus enumerator.
+	* AMD PC Lance "79c970" (linux: PCnet32 Lance) (vmware device)
+	* Intel 21140 ethernet card (virtual PC device)
+	* Floppy disk.
+	* IDE disk.
+	* arp, icmp, udp.
+	* tcp.
+	* formal keyboard, console.
+
+* Filesystem layer.
+	* VFS, like Linux.
+	* Each filesystem implemented in module.
+
+* 80x50 text mode console
+	* http://my.execpc.com/CE/AC/geezer/osd/graphics/modes.c

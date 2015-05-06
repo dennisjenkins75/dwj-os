@@ -1,0 +1,24 @@
+// From geekos on source forge (chapter 7, user thread creation):
+
+As described in Section 3, .Project Synopsis., you will need to create a thread for the new process. You will need to set up the stack of your new thread to look like it has just been interrupted. This will require pushing the appropriate values onto the stack to match what the hardware would push for an interrupt. The routine Push() (src/geekos/kthread.c) can be used to push individual values onto the stack. The required values should be pushed onto the stack as follows:
+
+    *      Stack Data selector (data selector)
+    *      Stack Pointer (end of data memory)
+    *      Eflags (IF bit should be set so interrupts are enabled)
+    *      Text selector (text selector)
+    *      Program Counter (code entry point address)
+    *      Error Code (0)
+    *      Interrupt Number (0)
+    *      General Purpose Registers (esi should contain address of argument block)
+    *      DS register (data selector)
+    *      ES register (data selector)
+    *      FS register (data selector)
+    *      GS register (data selector)
+
+Look in /src/project6/src/lowlevel.asm
+
+So plan for "switch stacks" is to:
+	1) push everything as if we had an interrupt,
+	2) switch ESP values (save old one first).
+	3) Do any other book-keeping
+	4) IRET
