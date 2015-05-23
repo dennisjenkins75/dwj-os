@@ -100,7 +100,7 @@ taskid_t	task_create(int (*entry_point)(void *arg), void *arg, const char *name,
 		goto error;
 	}
 
-	memset(task, 0, sizeof(task));
+	memset(task, 0, sizeof(*task));
 	task->kstack = kstack;
 	task->kstack_size = TASK_KSTACK_SIZE;
 	task->state = init_state;
@@ -365,7 +365,7 @@ int	task_get_stats(struct task_stats *stats)
 {
 	struct task *temp = NULL;
 
-	memset(stats, 0, sizeof(stats));
+	memset(stats, 0, sizeof(*stats));
 	spinlock_acquire(&task_list_lock);
 
 	for (temp = task_list; ; temp = temp->task_next)

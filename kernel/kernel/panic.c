@@ -56,7 +56,7 @@ void	dump_stack(uint32 frame_addr)
 	{
 		if (!is_valid_frame(frame_addr))
 		{
-			printf("\tebp:%p  --- likely invalid, stack trace terminated.\n");
+			printf("\tebp:%p  --- likely invalid, stack trace terminated.\n", frame_addr);
 		}
 
 		next_frame = *(uint32*)frame_addr;

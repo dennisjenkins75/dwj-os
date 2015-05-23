@@ -565,7 +565,7 @@ void	heap_init(void)
 	free_list->size = heap_bytes - sizeof(struct block_t);
 	free_list->next = NULL;
 
-	printf("heap: %d K avialable.\n", heap_bytes / 1024);
+	printf("heap: %d K available.\n", heap_bytes / 1024);
 
 	test_heap();
 }
