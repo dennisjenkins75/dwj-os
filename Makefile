@@ -233,4 +233,5 @@ $(DEBUGGER): $(DEBUGGER_OBJ) | $(KERNEL.MAP) $(MAP_TEMP)
 tools/core-debugger/%.o : tools/core-debugger/%.c
 	$(CC) $(HOST_CFLAGS) -c -o $@ $<
 
-
+cppcheck:
+		cppcheck --quiet --enable=all --inconclusive --std=posix  ./ 2>&1 | sort
