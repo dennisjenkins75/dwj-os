@@ -29,7 +29,7 @@ KERNEL_CFLAGS:=-DBUILDING_KERNEL -Werror -Wall -std=c99 -O0 -m32 -I ./ -I ./kern
 	-Wno-unused-but-set-variable -Wno-unused-variable
 ##	-fstrength-reduce -finline-functions -fno-builtin -fleading-underscore -ffreestanding
 
-HOST_CFLAGS:=-Wall -O2 -I ./
+HOST_CFLAGS:=-Wall -Wno-pointer-to-int-cast -m32 -O2 -I ./
 
 ASFLAGS:=	--32
 
