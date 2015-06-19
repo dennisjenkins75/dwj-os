@@ -50,7 +50,7 @@ void	obj_init(void)
 	printf("obj: %d handle slots.\n", _handle_array_size);
 }
 
-// Searches for the named onode.  Assumes array is alreayd locked.
+// Searches for the named onode.  Assumes array is already locked.
 // Returns index into array of any matching handle if found, -ENOENT otherwise.
 int	_obj_search(const char *name, enum OBJ_TYPE type)
 {
