@@ -64,6 +64,7 @@ typedef struct _handle* handle;
 #include "kernel/drivers/console.h"
 #include "kernel/drivers/pci.h"
 #include "kernel/drivers/ata.h"
+#include "kernel/test/test.h"
 
 /* breakpoint.c */
 extern void set_breakpoint(void *addr);

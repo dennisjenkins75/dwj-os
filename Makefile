@@ -177,6 +177,7 @@ KERNEL_KERNEL:=	debug main modules multiboot panic spinlock task obj_array semap
 KERNEL_KTASKS:=	demo hud reaper startup
 KERNEL_LIB:=	lib printf strerror
 KERNEL_VMM:=	heap pagefault vmm
+KERNEL_TEST:=	t-printf
 
 
 KERNEL_FILES:=	$(addprefix setup/,$(KERNEL_SETUP)) \
@@ -187,6 +188,7 @@ KERNEL_FILES:=	$(addprefix setup/,$(KERNEL_SETUP)) \
 		$(addprefix ktasks/,$(KERNEL_KTASKS)) \
 		$(addprefix lib/,$(KERNEL_LIB)) \
 		$(addprefix vmm/,$(KERNEL_VMM)) \
+		$(addprefix test/,$(KERNEL_TEST)) \
 
 KERNEL_FILES2:=	$(addprefix $(OBJ_DIR)/kernel/,$(KERNEL_FILES))
 KERNEL_OBJ:=	$(KERNEL_FILES2:=.o)

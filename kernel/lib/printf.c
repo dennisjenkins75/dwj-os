@@ -67,13 +67,23 @@ Revised May 12, 2000
 
 int 	do_printf (const char *fmt, size_t maxlen, va_list args, fnptr_t fn, void *ptr)
 {
-	unsigned state, flags, radix, actual_wd, count, given_wd;
+	int count = 0;		// Count of chars placed into buffer, not including final '\0'.
+	unsigned state, flags, radix, actual_wd, given_wd;
 	unsigned char *where, buf[PR_BUFLEN];
 	long num;
 
-	state = flags = count = given_wd = 0;
+	if (maxlen < 0) {
+		maxlen = 0x7fffffff;
+	}
+
+// "maxlen" is the size of the buffer, and includes space at the end for the "\0" character.
+// However, we will be comparing "count" to "maxlen" to know when we've exceeded the buffer
+// size limit.  We we must decrease "maxlen" to make room for the terminating NIL.
+	--maxlen;
+
+	state = flags = given_wd = 0;
 /* begin scanning format specifier list */
-	for(; *fmt; fmt++)
+	for(; *fmt && (count < maxlen); fmt++)
 	{
 		switch(state)
 		{
@@ -81,8 +91,9 @@ int 	do_printf (const char *fmt, size_t maxlen, va_list args, fnptr_t fn, void *
 		case 0:
 			if(*fmt != '%')	/* not %... */
 			{
-				fn(*fmt, &ptr);	/* ...just echo it */
-				count++;
+				if (count < maxlen) {
+					count += fn(*fmt, &ptr);	/* ...just echo it */
+				}
 				break;
 			}
 /* found %, get next char and advance state to check if next char is a flag */
@@ -93,8 +104,9 @@ int 	do_printf (const char *fmt, size_t maxlen, va_list args, fnptr_t fn, void *
 		case 1:
 			if(*fmt == '%')	/* %% */
 			{
-				fn(*fmt, &ptr);
-				count++;
+				if (count < maxlen) {
+					count += fn(*fmt, &ptr);
+				}
 				state = flags = given_wd = 0;
 				break;
 			}
@@ -242,40 +254,40 @@ EMIT:
 				if((flags & (PR_WS | PR_LZ)) ==
 					(PR_WS | PR_LZ))
 				{
-					fn('-', &ptr);
-					count++;
+					if (count < maxlen) {
+						count += fn('-', &ptr);
+					}
 				}
 /* pad on left with spaces or zeroes (for right justify) */
 EMIT2:				if((flags & PR_LJ) == 0)
 				{
-					while(given_wd > actual_wd)
+					while (given_wd > actual_wd)
 					{
-						fn(flags & PR_LZ ? '0' :
-							' ', &ptr);
-						count++;
+						if (count < maxlen) {
+							count += fn(flags & PR_LZ ? '0' : ' ', &ptr);
+						}
 						given_wd--;
 					}
 				}
 /* if we pad left with SPACES, do the sign now */
 				if((flags & (PR_WS | PR_LZ)) == PR_WS)
 				{
-					fn('-', &ptr);
-					count++;
+					if (count < maxlen) {
+						count += fn('-', &ptr);
+					}
 				}
 /* emit string/char/converted number */
-				while(*where != '\0')
+				while ((*where != '\0') && (count < maxlen))
 				{
-					fn(*where++, &ptr);
-					count++;
+					count += fn(*where++, &ptr);
 				}
 /* pad on right with spaces (for left justify) */
 				if(given_wd < actual_wd)
 					given_wd = 0;
 				else given_wd -= actual_wd;
-				for(; given_wd; given_wd--)
+				for(; given_wd && (count < maxlen); given_wd--)
 				{
-					fn(' ', &ptr);
-					count++;
+					count += fn(' ', &ptr);
 				}
 				break;
 			default:
@@ -289,20 +301,17 @@ EMIT2:				if((flags & PR_LJ) == 0)
 	return count;
 }
 
-/*****************************************************************************
-SPRINTF
-*****************************************************************************/
-static int vsprintf_help(unsigned c, void **ptr)
+static int vsprintf_help(unsigned char c, void **ptr)
 {
-	char *dst;
+	char *dst = NULL;
 
 	dst = *ptr;
 	*dst++ = c;
 	*ptr = dst;
-	return 0 ;
+
+	return 1;
 }
-/*****************************************************************************
-*****************************************************************************/
+
 int	vsnprintf(char *buffer, size_t maxlen, const char *fmt, va_list args)
 {
 	int ret_val;
@@ -324,23 +333,17 @@ int	snprintf (char *buffer, size_t maxlen, const char *fmt, ...)
 	return ret_val;
 }
 
-/*****************************************************************************
-PRINTF
-You must write your own putcar()
-*****************************************************************************/
-static int vprintf_help(unsigned c, void **ptr)
+static int vprintf_help(unsigned char c, void **ptr)
 {
 	con_putch(c);
-	return 0 ;
+	return 0;	// console has no limit
 }
-/*****************************************************************************
-*****************************************************************************/
+
 int	vprintf(const char *fmt, va_list args)
 {
 	return do_printf (fmt, -1, args, vprintf_help, NULL);
 }
-/*****************************************************************************
-*****************************************************************************/
+
 int	printf(const char *fmt, ...)
 {
 	va_list args;

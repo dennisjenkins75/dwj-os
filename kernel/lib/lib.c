@@ -143,6 +143,26 @@ unsigned short *memsetw(unsigned short *dest, unsigned short val, size_t count)
     return dest;
 }
 
+extern int	memcmp (const void *a, const void *b, size_t count)
+{
+	const char *aa = (const char *)a;
+	const char *bb = (const char *)b;
+
+	if (aa && bb && count) {
+		while (count && (*aa == *bb)) {
+			--count;
+			++aa;
+			++bb;
+		}
+	}
+
+	if (aa && bb && count) {
+		return *aa > *bb;
+	}
+
+	return 0;
+}
+
 // Not more than 'n' bytes are copied.  If the first 'n' bytes of
 // 'src' are not null terminated, 'dest' will not be null terminated.
 // Follows "man 3 strncpy"

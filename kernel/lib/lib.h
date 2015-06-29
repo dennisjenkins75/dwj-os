@@ -14,6 +14,7 @@ extern void	itoa(char *buf, int base, int d);
 extern void	*memcpy(void *dest, const void *src, size_t count);
 extern void	*memcpydw(void *dest, const void *src, size_t count);
 extern void	*memset(void *dest, char val, size_t count);
+extern int	memcmp (const void *a, const void *b, size_t count);
 extern unsigned short *memsetw(unsigned short *dest, unsigned short val, size_t count);
 extern char	*k_strncpy(char *dest, const char *src, size_t n);
 extern char	*strcpy_s(char *dest, int destlen, const char *src);

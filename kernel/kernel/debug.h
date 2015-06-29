@@ -9,7 +9,7 @@ static const int DEBUG_DEBUG = 4;
 static const int DEBUG_TRACE = 5;
 
 // Values for "nFacility"
-static const int FAC_GENREAL = 0;
+static const int FAC_GENERAL = 0;
 static const int FAC_HEAP    = 1;
 static const int FAC_OBJECT  = 2;
 static const int FAC_KEYBOARD = 3;

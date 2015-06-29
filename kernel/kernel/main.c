@@ -83,6 +83,7 @@ int	kmain (const struct phys_multiboot_info *mbi)
 	vmm_init_cleanup();	// Reclaim BIOS memory, .setup sections.
 
 	obj_init();
+	test_snprintf();
 
 	ramfs_init();
 	devfs_init();

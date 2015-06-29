@@ -2,7 +2,7 @@
 
 #include "kernel/kernel.h"
 
-int	kdebug_outch (unsigned int ch, void **ptr)
+int	kdebug_outch (unsigned char ch, void **ptr)
 {
 #if (DEBUG_LOG_TO_LPT)
 	outportb(LPT_BASE, ch);
