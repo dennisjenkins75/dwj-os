@@ -89,6 +89,8 @@ TOOLS:=		$(MAKE_MAP_TOOL) $(DEBUGGER)
 
 all:		dirs $(TOOLS) $(TARGETS) $(IMAGES)
 
+x16:		$(BOOT.0.fat12) $(LOADER.COM) $(DEBUG.0)
+
 clean:
 	rm -f $(TARGETS) $(IMAGES) $(TOOLS)
 	find . -name "*.[oa]" | xargs rm -f
@@ -151,14 +153,14 @@ $(DEBUG):	$(DEBUG.0)
 	mcopy -t -i $@ boot/dumpbios.S ::dumpbios.S
 
 $(BOOT.0.fat12):	boot/fat12.o
-	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
+	$(LD) -m elf_i386 -Ttext 0x0 -s --oformat binary -o $@ $<
 
 $(DEBUG.0):		boot/dumpbios.o
-	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
+	$(LD) -m elf_i386 -Ttext 0x0 -s --oformat binary -o $@ $<
 
 $(LOADER.COM):	loader/start.o loader/init.o loader/panic.o loader/print.o \
 		loader/memmap.o
-	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $^
+	$(LD) -m elf_i386 -Ttext 0x0 -s --oformat binary -o $@ $^
 
 # Just build a dummy initial ram disk for now.
 $(INITRD): $(KERNEL.VAST)

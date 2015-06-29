@@ -11,7 +11,7 @@ _start:
 
 
 	# DOS and BIOS parameter block goes here.
-	# Our buidl script will use "mkdosfs" to fill it in.
+	# Our build script will use "mkdosfs" to fill it in.
 	# See the Makefile for details.
 
 .org	62
@@ -38,7 +38,7 @@ skip_bpb:
         call    print_reg
 
         call    get_ip
-get_ip: 
+get_ip:
         popw    %ax
 	subw	$get_ip, %ax
         movw    $0x4950, %dx   # 'IP'
@@ -48,13 +48,13 @@ get_ip:
         movw    $0x5350, %dx   # 'SP'
         call    print_reg
 
-halt_x: 
+halt_x:
 	hlt
         jmp     halt_x
 
 # reg name in 'dx'
 # reg value in 'ax'
-print_reg: 
+print_reg:
         pushw   %ax
         movw    $7, %bx
         movb    $0x0e, %ah
@@ -67,7 +67,7 @@ print_reg:
         popw    %ax
         call    print_hex_word
 
-print_crlf: 
+print_crlf:
         pushw   %ax
         pushw   %bx
         movw    $7, %bx
@@ -86,17 +86,17 @@ print_crlf:
 #
 # On input, DS:SI points to ASCIIZ string to print via BIOS.
 # all registers are saved.
-print_str: 
+print_str:
         pusha
         movb    $0x0e, %ah
         movw    $7, %bx
-print_str_loop: 
+print_str_loop:
         lodsb
         orb     %al,%al         # did we just load the nil?
         jz      print_done
         int     $0x10
         jmp     print_str_loop
-print_done: 
+print_done:
         popa
         ret
 
@@ -106,27 +106,27 @@ print_done:
 # destroys ax
 # BX must be properly set for BIOS.
 
-print_hex_word: 
+print_hex_word:
         pushw   %ax
         movb    %ah,%al
         call    print_hex_byte
         popw    %ax
 
 # print 'al' as 2 hex digits.
-print_hex_byte: 
+print_hex_byte:
         pushw   %ax
         shrb    $4, %al
         call    print_hex_nibble
         popw    %ax
 
 # print lower nibble of 'al' as 1 hex digit.
-print_hex_nibble: 
+print_hex_nibble:
         pushw   %ax
         andb    $0x0f, %al
         cmpb    $0x09, %al
         jle     prn_nibble_1
         addb    $39, %al       # 'a' - '9'
-prn_nibble_1: 
+prn_nibble_1:
         addb    $48, %al
 	pushw	%bx
 	movw	$7, %bx
@@ -140,4 +140,3 @@ prn_nibble_1:
 #	Boot signature.
 .org    510
 	.word	0xAA55
-
