@@ -23,7 +23,7 @@ int	ktask_hud_entry(void *arg)
 		task_get_stats(&task_stats);
 		vmm_get_stats(&vmm_stats);
 
-		len = sprintf(text, "free: %5d, tasks: %3d %c", vmm_stats.pmm_free_pages, task_stats.total, spinner[sp%4]);
+		len = snprintf (text, sizeof(text), "free: %5d, tasks: %3d %c", vmm_stats.pmm_free_pages, task_stats.total, spinner[sp%4]);
 		con_print(80 - len, 1, 0x1f, len, text);
 
 		sp++;

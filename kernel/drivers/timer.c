@@ -28,7 +28,7 @@ void	timer_handler(struct regs *r)
 
 	g_timer_ticks++;
 
-	len = sprintf(temp, "%u Hz: %8u", g_tick_rate, g_timer_ticks);
+	len = snprintf (temp, sizeof(temp), "%u Hz: %8u", g_tick_rate, g_timer_ticks);
 	con_print(80 - len, 0, 0x1f, len, temp);
 
 #if (DEBUG_TIMER_TICK)

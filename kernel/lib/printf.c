@@ -65,7 +65,7 @@ Revised May 12, 2000
 2^32-1 in base 8 has 11 digits (add 5 for trailing NUL and for slop) */
 #define		PR_BUFLEN	16
 
-int 	do_printf (const char *fmt, va_list args, fnptr_t fn, void *ptr)
+int 	do_printf (const char *fmt, size_t maxlen, va_list args, fnptr_t fn, void *ptr)
 {
 	unsigned state, flags, radix, actual_wd, count, given_wd;
 	unsigned char *where, buf[PR_BUFLEN];
@@ -303,34 +303,22 @@ static int vsprintf_help(unsigned c, void **ptr)
 }
 /*****************************************************************************
 *****************************************************************************/
-int vsprintf(char *buffer, const char *fmt, va_list args)
+int	vsnprintf(char *buffer, size_t maxlen, const char *fmt, va_list args)
 {
 	int ret_val;
 
-	ret_val = do_printf(fmt, args, vsprintf_help, (void *)buffer);
+	ret_val = do_printf (fmt, maxlen, args, vsprintf_help, (void *)buffer);
 	buffer[ret_val] = '\0';
 	return ret_val;
 }
-/*****************************************************************************
-*****************************************************************************/
-int sprintf(char *buffer, const char *fmt, ...)
-{
-	va_list args;
-	int ret_val;
 
-	va_start(args, fmt);
-	ret_val = vsprintf(buffer, fmt, args);
-	va_end(args);
-	return ret_val;
-}
-
-int	snprintf (char *buffer, size_t max, const char *fmt, ...)
+int	snprintf (char *buffer, size_t maxlen, const char *fmt, ...)
 {
 	va_list args;
 	int ret_val;
 
 	va_start (args, fmt);
-	ret_val = vsprintf (buffer, fmt, args);
+	ret_val = vsnprintf (buffer, maxlen, fmt, args);
 	va_end (args);
 
 	return ret_val;
@@ -349,7 +337,7 @@ static int vprintf_help(unsigned c, void **ptr)
 *****************************************************************************/
 int	vprintf(const char *fmt, va_list args)
 {
-	return do_printf(fmt, args, vprintf_help, NULL);
+	return do_printf (fmt, -1, args, vprintf_help, NULL);
 }
 /*****************************************************************************
 *****************************************************************************/

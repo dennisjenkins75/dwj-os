@@ -268,7 +268,7 @@ void	schedule(void)
 
 	{
 		char temp[82];
-		int len = sprintf(temp, "cur %02d %s", current->taskid, current->name);
+		int len = snprintf(temp, sizeof(temp), "cur %02d %s", current->taskid, current->name);
 		while (len < 30)
 		{
 			temp[len++] = ' ';

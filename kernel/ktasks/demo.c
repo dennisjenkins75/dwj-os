@@ -29,7 +29,7 @@ int	ktask_demo_entry(void *arg)
 
 	current->ticks_reload = 1 << demo_row ;
 
-	l = sprintf(temp, "kthread %02d:", current->taskid);
+	l = snprintf(temp, sizeof(temp), "kthread %02d:", current->taskid);
 	con_print(x, y, 0x0f, l, temp);
 	x += l + 2;
 
@@ -57,7 +57,7 @@ int	ktask_demo_entry(void *arg)
 
 		con_print(x + pos, y, attr, 1, "\xb1");
 
-		l = sprintf(temp, "%08d", val);
+		l = snprintf (temp, sizeof(temp), "%08d", val);
 		con_print(x + w + 4, y, 0x07, l, temp);
 
 		if (0 > (l = sem_release(h, 1)))
@@ -85,7 +85,7 @@ void	create_demo_threads(int count)
 
 	for (i = 0; i < count; i++)
 	{
-		sprintf(name, "demo-%d", i);
+		snprintf (name, sizeof(name), "demo-%d", i);
 		tid[i] = task_create(ktask_demo_entry, (void*)(i), name, RUNNABLE);
 		ASSERT (tid[i] > 0);
 	}

@@ -22,7 +22,7 @@ void	kdebug (int nLevel, int nFacility, const char *fmt, ...)
 	va_list		va;
 
 	va_start (va, fmt);
-	do_printf (fmt, va, kdebug_outch, (void*)NULL);
+	do_printf (fmt, -1, va, kdebug_outch, (void*)NULL);
 	va_end (va);
 }
 
