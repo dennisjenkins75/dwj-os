@@ -46,6 +46,7 @@ typedef struct _handle* handle;
 #include "kernel/lib/errno.h"
 #include "kernel/lib/stdarg.h"
 #include "kernel/lib/assert.h"
+#include "kernel/lib/printf.h"
 #include "kernel/lib/lib.h"
 #include "kernel/kernel/spinlock.h"
 #include "kernel/kernel/debug.h"

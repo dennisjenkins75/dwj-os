@@ -175,7 +175,7 @@ KERNEL_DRVRS:=	ata console keyboard pci reboot timer vgafonts vmw_gate vmwguest
 KERNEL_FS:=	devfs mount ramfs vfs vfs_ops vnode
 KERNEL_KERNEL:=	debug main modules multiboot panic spinlock task obj_array semaphore wait
 KERNEL_KTASKS:=	demo hud reaper startup
-KERNEL_LIB:=	lib strerror
+KERNEL_LIB:=	lib printf strerror
 KERNEL_VMM:=	heap pagefault vmm
 
 

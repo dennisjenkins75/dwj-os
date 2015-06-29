@@ -6,14 +6,6 @@
 #define ROUND_UP(x,y) (((x) + (y) - 1) & ~((y)-1))
 
 /* lib.c */
-// Code form Zach Ogden, who got it from Chris Giese.
-typedef int (*fnptr_t)(unsigned int c, void **helper);
-extern int 	do_printf (const char *fmt, va_list args, fnptr_t fn, void *ptr);
-extern int	vsprintf(char *buffer, const char *fmt, va_list args);
-extern int	snprintf (char *buffer, size_t max, const char *fmt, ...);
-extern int	sprintf(char *buffer, const char *fmt, ...);
-extern int	vprintf(const char *fmt, va_list args);
-extern int	printf(const char *fmt, ...);
 extern size_t	strlen(const char *str);
 extern int	strcmp(const char *scursorPos, const char *s2);
 extern int	strncmp(const char *s1, const char *s2, size_t n);
