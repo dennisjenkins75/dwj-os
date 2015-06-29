@@ -32,9 +32,9 @@ void	test_spinlocks(void)
 	spinlock_acquire(&b);
 	spinlock_release(&b);
 
-/*
-	printf("spinlock = %p (%d bytes)\n", &b, sizeof(b));
-	mem_dump(&b, sizeof(b));
+#if 0
+	kdebug (DEBUG_DEBUG, FAC_SPINLOCK, "spinlock = %p (%d bytes)\n", &b, sizeof(b));
+	kdebug_mem_dump (DEBUG_DEBUG, FAC_SPINLOCK, &b, sizeof(b));
 	Halt();
-*/
+#endif
 }

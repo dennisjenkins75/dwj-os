@@ -29,7 +29,7 @@ static uint32		alloc_seq_id = 0;
 
 #define MIN_BLOCK_SIZE	(sizeof(struct block_t) + sizeof(uint32))
 
-//#define TRACE() printf("heap: trace, line %d\n", __LINE__)
+//#define TRACE() kdebug(DEBUG_TRACE, FAC_HEAP, "heap: trace, line %d\n", __LINE__)
 #define TRACE()
 
 // Given a block pointer, return the rear_guard pointer.
@@ -46,11 +46,11 @@ void	walk_list(struct block_t *hdr, const char *name)
 
 	for (i = 0; hdr && (i < 5); hdr = hdr->next, i++)
 	{
-		printf("    %5s: hdr=%p: size=%p, next=%p, prev=%p\n", name, hdr, hdr->size, hdr->next, hdr->prev);
+		kdebug (DEBUG_INFO, FAC_HEAP, "heap_dump: %5s: hdr=%p: size=%p, next=%p, prev=%p\n", name, hdr, hdr->size, hdr->next, hdr->prev);
 
 		if (hdr == hdr->next)
 		{
-			printf("\t\tERROR!  hdr = hdr->next\n");
+			kdebug(DEBUG_FATAL, FAC_HEAP, "heap_dump: ERROR!  hdr = hdr->next\n");
 			Halt();
 		}
 	}
@@ -61,35 +61,6 @@ void	heap_dump(void)
 	walk_list(free_list, "free");
 	walk_list(alloc_list, "alloc");
 }
-
-void	mem_dump(const void *addr, uint32 bytes)
-{
-	uint8*	start = (uint8*)((uint32)addr & ~0xf);			// round down to nearest 16
-	uint8*	end = (uint8*)(((uint32)addr + bytes + 0x0f) & ~0xf);	// round up to nearest 16
-	uint32	i;
-
-	while (start < end)
-	{
-		printf("%p: ", start);
-
-		for (i = 0; i < 16; i++)
-		{
-			printf(" %02x", start[i]);
-			if (i == 7) printf (" ");
-		}
-		printf("  ");
-
-		for (i = 0; i < 16; i++)
-		{
-			printf("%c", start[i] >= ' ' ? start[i] : '.');
-			if (i == 7) printf (" ");
-		}
-		printf("\n");
-
-		start += 16;
-	}
-}
-
 
 #if (HEAP_TRACK)
 void	*__kmalloc(uint32 bytes, uint32 flags, const char *file, int line, const char *func)
@@ -111,7 +82,7 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 
 #if (DEBUG_HEAP)
 	{ uint8 attr = con_set_attr(0x0f);
-	printf("kmalloc(%u,%u) rounds to %u\n", bytes, flags, total_bytes);
+	kdebug(DEBUG_DEBUG, FAC_HEAP, "kmalloc(%u,%u) rounds to %u\n", bytes, flags, total_bytes);
 	con_set_attr(attr); }
 #endif
 
@@ -125,7 +96,7 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 
 	if ((uint32)block % HEAP_ALLOC_GRANULARITY)
 	{
-		printf("heap: block(%p) is nor properly aligned.\n", block);
+		kdebug(DEBUG_DEBUG, FAC_HEAP, "heap: block(%p) is not properly aligned.\n", block);
 		ASSERT((uint32)block % HEAP_ALLOC_GRANULARITY == 0);
 	}
 
@@ -135,7 +106,7 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 		if (flags & HEAP_FAILOK)
 		{
 			spinlock_release(&heap_lock);
-			printf("heap: malloc(%d) failed.  Returning NULL\n", bytes);
+			kdebug(DEBUG_WARN, FAC_HEAP, "heap: malloc(%d) failed.  Returning NULL\n", bytes);
 			return NULL;
 		}
 
@@ -146,14 +117,14 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 	if (block->size > total_bytes)
 	{
 #if (DEBUG_HEAP)
-		printf("heap: found block of %d at %p for request of %d bytes\n", block->size, block, total_bytes);
+		kdebug(DEBUG_DEBUG, FAC_HEAP, "heap: found block of %d at %p for request of %d bytes\n", block->size, block, total_bytes);
 #endif
 
 // Do we have enough space left over for future allocation?
 		if (block->size - total_bytes > MIN_BLOCK_SIZE)
 		{
 #if (DEBUG_HEAP)
-			printf("Splitting block %p for %d bytes\n", block, total_bytes);
+			kdebug(DEBUG_DEBUG, FAC_HEAP, "Splitting block %p for %d bytes\n", block, total_bytes);
 #endif
 
 			next = (struct block_t*)((uint8*)block + total_bytes);
@@ -170,7 +141,6 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 // At this point we know that we are operating on "block".  We've already split (if possible) a free block.
 	if (free_list == block)
 	{
-//printf("free_list == block == %p, next = %p\n", free_list, next);
 		free_list = block->next;
 		ASSERT_HEAP(free_list);
 	}
@@ -232,7 +202,7 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 #endif
 
 #if (HEAP_REPLAY)
-	printf("heap-replay: replay_list[%d] = kmalloc(%d,%d);\n", block->seq_id, bytes, flags);
+	kdebug(DEBUG_DEBUG, FAC_HEAP, "heap-replay: replay_list[%d] = kmalloc(%d,%d);\n", block->seq_id, bytes, flags);
 #endif
 
 TRACE();
@@ -247,7 +217,7 @@ TRACE();
 struct block_t *	heap_merge(struct block_t *a, struct block_t *b)
 {
 #if (DEBUG_HEAP)
-	printf("heap: heap_merge(%p, %p) - trying.\n", a, b);
+	kdebug(DEBUG_DEBUG, FAC_HEAP, "heap: heap_merge(%p, %p) - trying.\n", a, b);
 #endif
 
 	ASSERT(a);
@@ -258,7 +228,7 @@ struct block_t *	heap_merge(struct block_t *a, struct block_t *b)
 	if ((a->next == b) && (b->prev == a) && ((uint8*)a + a->size == (uint8*)b))
 	{
 #if (DEBUG_HEAP)
-		printf("heap: merging %p and %p\n", a, b);
+		kdebug (DEBUG_DEBUG, FAC_HEAP, "heap: merging %p and %p\n", a, b);
 #endif
 
 		a->size += b->size;
@@ -288,7 +258,7 @@ void	__kfree(void *ptr)
 
 #if (DEBUG_HEAP)
 	{ uint8 attr = con_set_attr(0x0f);
-	printf("kfree(%p, %s, %d, %s)\n", ptr, file, line, func);
+	kdebug(DEBUG_DEBUG, FAC_HEAP, "kfree(%p, %s, %d, %s)\n", ptr, file, line, func);
 	con_set_attr(attr); }
 #endif
 
@@ -320,17 +290,17 @@ void	__kfree(void *ptr)
 	{
 		if (*rear_guard != MALLOC_GUARD_MAGIC)
 		{
-			mem_dump((void*)&_kernel_heap_start, 128);
+			kdebug_mem_dump(DEBUG_FATAL, FAC_HEAP, (void*)&_kernel_heap_start, 128);
 			PANIC2("kfree(%p) user-chunk was over-run.\n", ptr);
 		}
 	}
 
 #if (DEBUG_HEAP)
-	printf("kfree(%p) size was %d\n", ptr, hdr->size);
+	kdebug (DEBUG_DEBUG, FAC_HEAP, "kfree(%p) size was %d\n", ptr, hdr->size);
 #endif
 
 #if (HEAP_REPLAY)
-	printf("heap-replay: kfree(replay_list[%d]); replay_list[%d] = NULL;\n", hdr->seq_id, hdr->seq_id);
+	kdebug (DEBUG_DEBUG, FAC_HEAP, "heap-replay: kfree(replay_list[%d]); replay_list[%d] = NULL;\n", hdr->seq_id, hdr->seq_id);
 #endif
 
 	memset(ptr, 0xce, hdr->size - sizeof(struct block_t));
@@ -404,7 +374,7 @@ void	__kfree(void *ptr)
 	}
 
 #if (DEBUG_HEAP)
-	printf("kfree(%p) done.\n", ptr);
+	kdebug (DEBUG_DEBUG, FAC_HEAP, "kfree(%p) done.\n", ptr);
 #endif
 }
 
@@ -566,6 +536,7 @@ void	heap_init(void)
 	free_list->next = NULL;
 
 	printf("heap: %d K available.\n", heap_bytes / 1024);
+	kdebug(DEBUG_INFO, FAC_HEAP, "heap: %d K available.\n", heap_bytes / 1024);
 
 	test_heap();
 }
@@ -597,6 +568,6 @@ void	heap_grow(struct regs *r, void *cr2_value)
 	count = vmm_map_pages(virt, NULL, count, PTE_KDATA | VMM_SKIP_MAPPED);
 
 #if (DEBUG_HEAP)
-	printf("heap: added %d pages, %d free\n", count, gp_total_free_4k_pages);
+	kdebug(DEBUG_DEBUG, FAC_HEAP, "heap: added %d pages, %d free\n", count, gp_total_free_4k_pages);
 #endif
 }

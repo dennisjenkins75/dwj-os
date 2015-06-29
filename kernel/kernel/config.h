@@ -24,7 +24,7 @@
 #define HEAP_ALLOC_GRANULARITY	8
 
 // Do extra heap integrity checks on every alloc/free.
-#define DEBUG_HEAP		0
+#define DEBUG_HEAP		1
 
 // Should the heap keep track of who allocated each block (16 bytes overhead per-kmalloc).
 #define HEAP_TRACK		1

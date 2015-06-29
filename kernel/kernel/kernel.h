@@ -48,6 +48,7 @@ typedef struct _handle* handle;
 #include "kernel/lib/assert.h"
 #include "kernel/lib/lib.h"
 #include "kernel/kernel/spinlock.h"
+#include "kernel/kernel/debug.h"
 #include "kernel/kernel/multiboot.h"
 #include "kernel/kernel/task.h"
 #include "kernel/kernel/objects.h"

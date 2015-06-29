@@ -68,8 +68,7 @@ Revised May 12, 2000
 2^32-1 in base 8 has 11 digits (add 5 for trailing NUL and for slop) */
 #define		PR_BUFLEN	16
 
-static int 	do_printf(const char *fmt, va_list args, fnptr_t fn, void *ptr)
-//static int 	do_printf(fnptr_t fn, void *ptr const char *fmt, va_list args)
+int 	do_printf (const char *fmt, va_list args, fnptr_t fn, void *ptr)
 {
 	unsigned state, flags, radix, actual_wd, count, given_wd;
 	unsigned char *where, buf[PR_BUFLEN];
@@ -327,6 +326,19 @@ int sprintf(char *buffer, const char *fmt, ...)
 	va_end(args);
 	return ret_val;
 }
+
+int	snprintf (char *buffer, size_t max, const char *fmt, ...)
+{
+	va_list args;
+	int ret_val;
+
+	va_start (args, fmt);
+	ret_val = vsprintf (buffer, fmt, args);
+	va_end (args);
+
+	return ret_val;
+}
+
 /*****************************************************************************
 PRINTF
 You must write your own putcar()

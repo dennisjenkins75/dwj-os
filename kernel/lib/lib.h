@@ -7,8 +7,10 @@
 
 /* lib.c */
 // Code form Zach Ogden, who got it from Chris Giese.
-typedef int (*fnptr_t)(unsigned c, void **helper);
+typedef int (*fnptr_t)(unsigned int c, void **helper);
+extern int 	do_printf (const char *fmt, va_list args, fnptr_t fn, void *ptr);
 extern int	vsprintf(char *buffer, const char *fmt, va_list args);
+extern int	snprintf (char *buffer, size_t max, const char *fmt, ...);
 extern int	sprintf(char *buffer, const char *fmt, ...);
 extern int	vprintf(const char *fmt, va_list args);
 extern int	printf(const char *fmt, ...);

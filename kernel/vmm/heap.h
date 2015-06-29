@@ -9,8 +9,6 @@
 
 #define HEAP_ALLOC_MASK (~(HEAP_GROW_PAGES * PAGE_SIZE -1))
 
-void	mem_dump(const void *addr, uint32 bytes);
-
 void	heap_init(void);
 void	heap_grow(struct regs *r, void *cr2_value);
 

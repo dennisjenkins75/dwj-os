@@ -9,7 +9,7 @@ static volatile int	irq_received = 0;
 
 void	ata_irq_handler(struct regs *r)
 {
-//	printf("ata: irq received.\n");
+	kdebug (DEBUG_DEBUG, FAC_DISK_ATA, "ata: irq received.\n");
 	irq_received = 1;
 }
 
@@ -58,15 +58,15 @@ FIXME(); // need a time limit or something.
 			break;
 		}
 
-		printf(">");
+		kdebug (DEBUG_DEBUG, FAC_DISK_ATA, ">");
 	} while (1);
 
 
 	// then wait for interrupt.
-//printf("ata: read: waiting for interrupt.\n");
+	kdebug (DEBUG_DEBUG, FAC_DISK_ATA, "ata: read: waiting for interrupt.\n");
 	while (!irq_received)
 	{
-		printf(".");
+		kdebug (DEBUG_DEBUG, FAC_DISK_ATA, ".");
 	}
 
 	// get the status again. (required by the spec?)
@@ -94,7 +94,7 @@ FIXME(); // Clean up the ASM below
 		);
 	}
 
-	mem_dump(buffer, 512);
+	kdebug_mem_dump (DEBUG_DEBUG, FAC_DISK_ATA, buffer, 512);
 
 	return 0;
 }
@@ -117,21 +117,21 @@ void	ata_probe_ctrlr(uint16 base_port)
 		return;
 	}
 
-	printf("ata: controller found at %04x\n", base_port);
+	kdebug (DEBUG_DEBUG, FAC_DISK_ATA, "ata: controller found at %04x\n", base_port);
 
 // Probe for master device on controller.
 	outportb(base_port + ATA_IO_DRIVE_HEAD, 0xa0);
 	Nop();
 	if (ATA_STATUS_READY & inportb(base_port + ATA_IO_STATUS))
 	{
-		printf("ata: found primary device\n");
+		kdebug (DEBUG_DEBUG, FAC_DISK_ATA, "ata: found primary device\n");
 	}
 
 	outportb(base_port + ATA_IO_DRIVE_HEAD, 0xa0 | 0x10);
 	Nop();
 	if (ATA_STATUS_READY & inportb(base_port + ATA_IO_STATUS))
 	{
-		printf("ata: found secondary device\n");
+		kdebug (DEBUG_DEBUG, FAC_DISK_ATA, "ata: found secondary device\n");
 	}
 }
 
@@ -149,7 +149,7 @@ void	ata_test(void)
 		int r = ata_read_lba28(ATA_CTRLR_0_BASE, 0, 0, 1, buffer);
 //int	ata_read_lba28(uint16 base_port, int ms, uint32 lba28, uint8 count, void *buffer)
 
-		printf("ata: read = %d\n", r);
+		kdebug (DEBUG_DEBUG, FAC_DISK_ATA, "ata: read = %d\n", r);
 
 		kfree(buffer);
 	}
