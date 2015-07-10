@@ -142,6 +142,9 @@ int	vfs_vnode_free(struct vnode *vn);
 // returns '0' in success or error code on error.
 int	vfs_vnode_find(const char *name, struct vnode **vn);
 
+// Displays contents of vnode, as a debugging aid.
+void	vfs_vnode_debug (struct vnode *vn, const char *extra);
+
 /////////////////////////////////////////////////////////////////////////
 // mount.c
 int	vfs_mount(const char *type, const char *mntpoint, const char *src, const char *opts);
@@ -152,3 +155,8 @@ int	vfs_mkdir(const char *path);
 
 // implemented in "ramfs.c"
 void	ramfs_init(void);
+
+
+// kernel/fs/dentry.c
+struct dentry*	dentry_alloc (struct dentry *parent, const char *name);
+void	dentry_free (struct dentry *d);

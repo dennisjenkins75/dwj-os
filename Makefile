@@ -172,7 +172,7 @@ $(INITRD): $(KERNEL.VAST)
 KERNEL_SETUP:=	start setup_con setup_vmm
 KERNEL_ARCH:=	breakpoint gdt i386 idt intr
 KERNEL_DRVRS:=	ata console keyboard pci reboot timer vgafonts vmw_gate vmwguest
-KERNEL_FS:=	devfs mount ramfs vfs vfs_ops vnode
+KERNEL_FS:=	dentry devfs mount ramfs vfs vfs_ops vnode
 KERNEL_KERNEL:=	debug main multiboot panic spinlock task obj_array semaphore wait
 KERNEL_KTASKS:=	demo hud reaper startup
 KERNEL_LIB:=	lib printf strerror

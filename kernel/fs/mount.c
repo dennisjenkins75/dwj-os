@@ -12,6 +12,7 @@ int	vfs_mount(const char *type, const char *mntpoint, const char *src, const cha
 	struct vnode	*root_vn = NULL;
 	struct vnode	*mnt_vn = NULL;
 	struct fs_mount	*mount = NULL;
+	struct dentry	*dentry = NULL;
 	int		result = 0;
 
 T();	if (!type || !mntpoint)
@@ -41,11 +42,26 @@ T();		if (0 > (result = vfs_vnode_find(src, &src_vn)))
 		{
 T();			goto error;
 		}
+
+		vfs_vnode_debug (src_vn, "vfs_mount@src_vn");
 	}
 
 T();	if (0 > (result = vfs_vnode_find(mntpoint, &mnt_vn)))
 	{
 		goto error;
+	}
+
+	vfs_vnode_debug (mnt_vn, "vfs_mount@mnt_vn");
+	ASSERT (0 == ((NULL == mnt_vn) ^ (NULL == fs_root)));
+
+// If no file systems are mounted yet, create an empty root directory.
+	if (!fs_root) {
+		if (NULL == (dentry = dentry_alloc (NULL, ""))) {
+			result = -ENOMEM;
+			goto error;
+		}
+	} else {
+		PANIC1 ("vfs_mount() not implemented for non-NULL fs_root\n");
 	}
 
 T();	if (NULL == (mount = (struct fs_mount*)kmalloc(sizeof(*mount), HEAP_FAILOK)))
@@ -55,7 +71,7 @@ T();	if (NULL == (mount = (struct fs_mount*)kmalloc(sizeof(*mount), HEAP_FAILOK)
 	}
 
 T();	mount->fs_type = fs_type;
-	mount->d_root = NULL;		// FIXME: Need to resolve before kmalloc()
+	mount->d_root = dentry;		// root directory of this mount point.
 	mount->root = NULL;		// Filled in shortly.
 	mount->old = NULL;		// Filled in shortly.
 	mount->src_vn = src_vn;
@@ -118,6 +134,10 @@ error:
 T();	if (mount)
 	{
 		kfree(mount);
+	}
+
+	if (dentry) {
+		dentry_free (dentry);
 	}
 
 	if (root_vn)

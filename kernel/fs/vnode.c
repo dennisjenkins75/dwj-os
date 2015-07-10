@@ -124,3 +124,23 @@ T();
 
 	return 0;
 }
+
+void	vfs_vnode_debug (struct vnode *vn, const char *extra)
+{
+	printf ("vfs_vnode_debug (%p): %s\n", vn, extra ? extra : "");
+	if (!vn) {
+		return;
+	}
+
+	printf ("vn->parent    = %p\n", vn->parent);
+	printf ("vn->next      = %p\n", vn->next);
+	printf ("vn->prev      = %p\n", vn->prev);
+	printf ("vn->mode      = %04x\n", vn->mode);
+	printf ("vn->file_size = %lu\n", vn->file_size);
+	printf ("vn->blocks    = %lu\n", vn->blocks);
+	printf ("vn->inode_num = %ld\n", vn->inode_num);
+	printf ("vn->ref_count = %d\n", vn->ref_count);
+	printf ("vn->mount     = %p\n", vn->mount);
+	printf ("vn->privdata  = %p\n", vn->private_data);
+}
+
