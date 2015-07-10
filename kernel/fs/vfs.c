@@ -75,7 +75,7 @@ int	vfs_register_fs(const char *name, struct vfs_ops *ops)
 	spinlock_release(&vfs_fstable_lock);
 
 	printf("fs type '%s' registered.\n", name);
-
+	ASSERT (fs->vfs_ops == ops);
 	return 0;
 }
 

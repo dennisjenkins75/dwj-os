@@ -3,37 +3,35 @@
 #include "kernel/kernel/kernel.h"
 
 // Creates a new vnode.  Sets ref count to 1.
-// Must return NULL on failure.
-struct vnode*   vfs_vnode_alloc(const char *name, struct vnode *parent, struct fs_mount *mount)
+int	vfs_vnode_alloc(struct vnode *parent, struct fs_mount *mount, struct vnode **vnode_new)
 {
-	struct vnode	*vn;
+	struct vnode	*vn = NULL;
 
-	ASSERT(name);
-	ASSERT(mount);
+T();	ASSERT (vnode_new);
+T();	ASSERT (NULL == *vnode_new);
+T();	ASSERT (mount);
+T();	ASSERT (mount->fs_type);
+T();	ASSERT (mount->fs_type->vfs_ops);
 	// parent may be NULL.
 
-	if (NULL == (vn = kmalloc(sizeof(*vn), HEAP_FAILOK)))
-	{
-		return NULL;
-	}
-
-	if (NULL == (vn->name = strdup(name)))
-	{
-		kfree(vn);
-		return NULL;
+T();	if (NULL == (vn = kmalloc(sizeof(struct vnode), HEAP_FAILOK))) {
+		return -ENOMEM;
 	}
 
 	vn->parent = parent;
-	vn->child = NULL;
 	vn->next = vn->prev = vn;
 	vn->mode = 0;
+	vn->file_size = 0;
+	vn->blocks = 0;
 	vn->inode_num = -1;
 	vn->ref_count = 1;
-	vn->vfs_ops = NULL;
+T();	vn->vfs_ops = mount->fs_type->vfs_ops;
 	vn->mount = mount;
-	vn->data = NULL;
+	vn->private_data = NULL;
+T();	spinlock_init (&(vn->v_lock), "vnode");
 
-	return vn;
+T();	*vnode_new = vn;
+	return 0;
 }
 
 // Decrements ref count.  If zero, frees vnode.

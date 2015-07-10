@@ -14,22 +14,22 @@ int	vfs_mount(const char *type, const char *mntpoint, const char *src, const cha
 	struct fs_mount	*mount = NULL;
 	int		result = 0;
 
-	if (!type || !mntpoint)
+T();	if (!type || !mntpoint)
 	{
 		return -EINVAL;
 	}
 
-	if (!fs_root && strcmp(mntpoint, "/"))
+T();	if (!fs_root && strcmp(mntpoint, "/"))
 	{
 		return -EINVAL;
 	}
 
-	if (NULL == (fs_type = vfs_find_fs(type)))
+T();	if (NULL == (fs_type = vfs_find_fs(type)))
 	{
 		return -ENODEV;
 	}
 
-	if ((fs_type->vfs_ops->flags & VFS_NEED_DEV) && !src)
+T();	if ((fs_type->vfs_ops->flags & VFS_NEED_DEV) && !src)
 	{
 		result = -EINVAL;
 		goto error;
@@ -37,9 +37,9 @@ int	vfs_mount(const char *type, const char *mntpoint, const char *src, const cha
 
 T();	if (src && src[0])
 	{
-		if (0 > (result = vfs_vnode_find(src, &src_vn)))
+T();		if (0 > (result = vfs_vnode_find(src, &src_vn)))
 		{
-			goto error;
+T();			goto error;
 		}
 	}
 
@@ -54,11 +54,19 @@ T();	if (NULL == (mount = (struct fs_mount*)kmalloc(sizeof(*mount), HEAP_FAILOK)
 		goto error;
 	}
 
+T();	mount->fs_type = fs_type;
+	mount->d_root = NULL;		// FIXME: Need to resolve before kmalloc()
+	mount->root = NULL;		// Filled in shortly.
+	mount->old = NULL;		// Filled in shortly.
+	mount->src_vn = src_vn;
+	mount->data = NULL;
+	mount->next = mount;
+	mount->prev = mount;
+	spinlock_init (&(mount->fs_lock), "fs_mount");
+
 T();	if (!mnt_vn)
 	{
-T();		if (NULL == (mnt_vn = vfs_vnode_alloc("/", NULL, mount)))
-		{
-			result = -ENOMEM;
+T();		if (0 > (result = vfs_vnode_alloc (NULL, mount, &mnt_vn))) {
 			goto error;
 		}
 
@@ -67,19 +75,15 @@ T();		if (NULL == (mnt_vn = vfs_vnode_alloc("/", NULL, mount)))
 
 T();		root_vn = mnt_vn;
 	}
-	else if (NULL == (root_vn = vfs_vnode_alloc(mnt_vn->name, mnt_vn->parent, mount)))
+	else
 	{
-		result = -ENOMEM;
-		goto error;
+		if (0 > (result = vfs_vnode_alloc (mnt_vn->parent, mount, &root_vn))) {
+			goto error;
+		}
 	}
 
-T();	mount->fs_type = fs_type;
-	mount->src_vn = src_vn;
-	mount->root = root_vn;
+T();	mount->root = root_vn;
 	mount->old = mnt_vn;
-	mount->next = mount;
-	mount->prev = mount;
-	mount->data = NULL;
 
 T();	if (fs_type->vfs_ops->mount)
 	{
@@ -106,7 +110,7 @@ T();	if (fs_root)
 		fs_root = mount;
 	}
 
-//	printf("vfs_mount(%s, %s, %s) done.\n", type, mntpoint, src);
+	printf("vfs_mount(%s, %s, %s) done.\n", type, mntpoint, src);
 
 	return 0;
 

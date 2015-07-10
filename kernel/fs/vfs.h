@@ -4,11 +4,13 @@
 struct statvfs;
 struct stat;
 struct dirent;
+struct dentry;
 struct vnode;
 struct vfs_ops;
 struct fs_mount;
 struct fs_type;
 
+typedef unsigned long long inode_t;
 
 typedef unsigned int mode_t;
 #define S_IFDIR		0x1000
@@ -28,22 +30,22 @@ struct statvfs
 struct stat
 {
 	off64_t		st_size;
-	int		inode;
+	inode_t		inode;
 };
 
 struct dirent
 {
 	char		*fname;
-	int		inode;
+	inode_t		inode;
 };
 
 struct vfs_ops
 {
 	int	flags;
 	int	(*statvfs)(struct vnode *vn, struct statvfs *statvfs);
-//	int	(*namei)(struct vnode *vn, const char *path, int *inode_num);
-//	int	(*geti)(struct fs_mount *mnt, int inode_num, struct vnode *vn);
-//	int	(*puti)(struct fs_mount *mnt, int inode_num, struct vnode *vn);
+//	int	(*namei)(struct vnode *vn, const char *path, inode_t *inode_num);
+//	int	(*geti)(struct fs_mount *mnt, inode_t inode_num, struct vnode *vn);
+//	int	(*puti)(struct fs_mount *mnt, inode_t inode_num, struct vnode *vn);
 	int	(*open)(struct vnode *vn, const char *fname, int flags, int mode);
 	int	(*close)(struct vnode *vn);
 	ssize_t	(*read)(struct vnode *vn, void *buffer, size_t count, off64_t offset);
@@ -57,25 +59,47 @@ struct vfs_ops
 	int	(*find)(struct vnode *vn, const char *name, struct vnode **result);
 };
 
+// "dentry" represents a directory (eg, named) hierarchy of an object in a file-system.
+
+typedef struct dentry {
+	struct dentry		*parent;
+	struct dentry		*child;
+	struct dentry		*next;
+	struct dentry		*prev;
+
+	struct vnode		*vnode;
+	char			*name;		// dynamically allocated on heap.
+	int			ref_count;
+	struct spinlock		d_lock;
+} dentry;
+
 typedef struct vnode
 {
+// If the vnode is the absolute root of the global file-system, then "parent" points to the vnode itself.
 	struct vnode		*parent;
-	struct vnode		*child;
+
+// All vnodes are kept in a linked-list, for run-time debugging.
+// 'next' and 'prev' to not imply any directory hierarchy relationship between vnodes.
 	struct vnode		*next;
 	struct vnode		*prev;
 
-	char			*name;
 	mode_t			mode;
-	int			inode_num;
+	ssize_t			file_size;
+	ssize_t			blocks;
+
+	inode_t			inode_num;
 	int			ref_count;
 	struct vfs_ops		*vfs_ops;	// some file systems (dev) allow each file to have its own ops.
 	struct fs_mount		*mount;
-	void			*data;		// per filesystem private data.
+	void			*private_data;		// per filesystem private data.
+
+	struct spinlock		v_lock;
 } vnode;
 
 typedef struct fs_mount
 {
 	struct fs_type		*fs_type;
+	struct dentry		*d_root;
 	struct vnode		*root;		// vnode for root of this mount.
 	struct vnode		*old;		// old copy of vnode for mount point.
 	struct vnode		*src_vn;	// block device for mount source (if any).
@@ -83,6 +107,7 @@ typedef struct fs_mount
 
 	struct fs_mount		*next;
 	struct fs_mount		*prev;
+	struct spinlock		fs_lock;
 } fs_mount;
 
 typedef struct fs_type
@@ -108,7 +133,7 @@ void	vfs_release_fs(struct fs_type *fs);
 /////////////////////////////////////////////////////////////////////////
 // vnode.c
 // Creates a new vnode.  Sets ref count to 1.
-struct vnode*	vfs_vnode_alloc(const char *name, struct vnode *parent, struct fs_mount *mount);
+int	vfs_vnode_alloc(struct vnode *parent, struct fs_mount *mount, struct vnode **vnode_new);
 
 // Decrements ref-count of vnode.  Frees memory allocated to it if no longer in use.
 int	vfs_vnode_free(struct vnode *vn);
