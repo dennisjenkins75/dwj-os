@@ -5,9 +5,6 @@
 
 #include "kernel/kernel/kernel.h"
 
-#define T() printf ("line: %d\n", __LINE__)
-//#define T()
-
 void	_obj_dump_wait_node(const char *header, const struct wait_node *wn)
 {
 	uint8	attr = con_set_attr(0x1f);

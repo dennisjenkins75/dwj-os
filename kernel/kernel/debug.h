@@ -18,3 +18,7 @@ static const int FAC_SPINLOCK = 5;
 
 void	kdebug (int nLevel, int nFacility, const char *fmt, ...);
 void	kdebug_mem_dump (int nLevel, int nFacility, const void *addr, uint32 bytes);
+
+//#define T() printf("%s: %d\n", __FUNCTION__, __LINE__)
+#define T()
+

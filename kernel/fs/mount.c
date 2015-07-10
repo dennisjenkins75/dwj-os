@@ -5,9 +5,6 @@
 
 #include "kernel/kernel/kernel.h"
 
-//#define T() printf("%s: %d\n", __FUNCTION__, __LINE__)
-#define T()
-
 int	vfs_mount(const char *type, const char *mntpoint, const char *src, const char *opts)
 {
 	struct fs_type	*fs_type = NULL;

@@ -2,9 +2,6 @@
 
 #include "kernel/kernel/kernel.h"
 
-//#define T() printf("%s: %d\n", __FUNCTION__, __LINE__)
-#define T()
-
 // Creates a new vnode.  Sets ref count to 1.
 // Must return NULL on failure.
 struct vnode*   vfs_vnode_alloc(const char *name, struct vnode *parent, struct fs_mount *mount)

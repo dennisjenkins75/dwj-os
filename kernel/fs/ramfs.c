@@ -6,8 +6,6 @@
 
 #include "kernel/kernel/kernel.h"
 
-//#define T() printf("%s: %d\n", __FUNCTION__, __LINE__)
-#define T()
 
 struct ramfs_inode
 {

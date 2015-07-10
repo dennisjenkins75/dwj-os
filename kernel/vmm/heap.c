@@ -29,9 +29,6 @@ static uint32		alloc_seq_id = 0;
 
 #define MIN_BLOCK_SIZE	(sizeof(struct block_t) + sizeof(uint32))
 
-//#define TRACE() kdebug(DEBUG_TRACE, FAC_HEAP, "heap: trace, line %d\n", __LINE__)
-#define TRACE()
-
 // Given a block pointer, return the rear_guard pointer.
 // The rear-gaurd is HEAP_ALLOC_GRANULARITY bytes large, but
 // is always a multiple of sizeof(uint32) (ie, 4).
@@ -205,7 +202,6 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 	kdebug(DEBUG_DEBUG, FAC_HEAP, "heap-replay: replay_list[%d] = kmalloc(%d,%d);\n", block->seq_id, bytes, flags);
 #endif
 
-TRACE();
 	spinlock_release(&heap_lock);
 
 
