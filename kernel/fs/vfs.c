@@ -12,7 +12,7 @@ static struct spinlock vfs_fstable_lock = INIT_SPINLOCK("vfs_fstable");
 static struct fs_type	*fs_type_list = NULL;
 
 // Start of all file-system lookups.
-struct mount	*fs_root = NULL;
+struct fs_mount	*fs_root = NULL;
 
 // Insert new fs into linked list of file-systems.
 int	vfs_register_fs(const char *name, struct vfs_ops *ops)

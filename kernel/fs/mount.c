@@ -14,7 +14,7 @@ int	vfs_mount(const char *type, const char *mntpoint, const char *src, const cha
 	struct vnode	*src_vn = NULL;
 	struct vnode	*root_vn = NULL;
 	struct vnode	*mnt_vn = NULL;
-	struct mount	*mount = NULL;
+	struct fs_mount	*mount = NULL;
 	int		result = 0;
 
 	if (!type || !mntpoint)
@@ -51,7 +51,7 @@ T();	if (0 > (result = vfs_vnode_find(mntpoint, &mnt_vn)))
 		goto error;
 	}
 
-T();	if (NULL == (mount = (struct mount*)kmalloc(sizeof(*mount), HEAP_FAILOK)))
+T();	if (NULL == (mount = (struct fs_mount*)kmalloc(sizeof(*mount), HEAP_FAILOK)))
 	{
 		result = -ENOMEM;
 		goto error;

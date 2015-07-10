@@ -7,7 +7,7 @@
 
 // Creates a new vnode.  Sets ref count to 1.
 // Must return NULL on failure.
-struct vnode*   vfs_vnode_alloc(const char *name, struct vnode *parent, struct mount *mount)
+struct vnode*   vfs_vnode_alloc(const char *name, struct vnode *parent, struct fs_mount *mount)
 {
 	struct vnode	*vn;
 

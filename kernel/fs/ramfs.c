@@ -23,7 +23,7 @@ struct ramfs_inode
 	struct ramfs_inode	*prev;
 };
 
-int	ramfs_mount(struct vnode *vn, struct mount *mount, const char *ops)
+int	ramfs_mount(struct vnode *vn, struct fs_mount *mount, const char *ops)
 {
 	struct ramfs_inode *root;
 
