@@ -73,7 +73,7 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 	uint32	total_bytes = 0;	// How much we need to carve out of free-space.
 	int	i = 0;			// Generic loop variable.
 
-	req_bytes = ROUND_UP(bytes, HEAP_ALLOC_GRANULARITY);
+T();	req_bytes = ROUND_UP(bytes, HEAP_ALLOC_GRANULARITY);
 
 	total_bytes = ROUND_UP(sizeof(struct block_t) + req_bytes + sizeof(uint32), HEAP_ALLOC_GRANULARITY);
 
@@ -83,26 +83,26 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 	con_set_attr(attr); }
 #endif
 
-	spinlock_acquire(&heap_lock);
+T();	spinlock_acquire(&heap_lock);
 
 // Walk free list looking for block big enough.
-	if (free_list)
+T();	if (free_list)
 	{
 		for (block = free_list; block->next && (total_bytes > block->size); block = block->next);
 	}
 
-	if ((uint32)block % HEAP_ALLOC_GRANULARITY)
+T();	if ((uint32)block % HEAP_ALLOC_GRANULARITY)
 	{
 		kdebug(DEBUG_DEBUG, FAC_HEAP, "heap: block(%p) is not properly aligned.\n", block);
 		ASSERT((uint32)block % HEAP_ALLOC_GRANULARITY == 0);
 	}
 
 // Are we out of heap space?
-	if (!block)
+T();	if (!block)
 	{
-		if (flags & HEAP_FAILOK)
+T();		if (flags & HEAP_FAILOK)
 		{
-			spinlock_release(&heap_lock);
+T();			spinlock_release(&heap_lock);
 			kdebug(DEBUG_WARN, FAC_HEAP, "heap: malloc(%d) failed.  Returning NULL\n", bytes);
 			return NULL;
 		}
@@ -111,20 +111,20 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 	}
 
 // Did we find a block bigger than what we needed?  If so, split it.
-	if (block->size > total_bytes)
+T();	if (block->size > total_bytes)
 	{
 #if (DEBUG_HEAP)
 		kdebug(DEBUG_DEBUG, FAC_HEAP, "heap: found block of %d at %p for request of %d bytes\n", block->size, block, total_bytes);
 #endif
 
 // Do we have enough space left over for future allocation?
-		if (block->size - total_bytes > MIN_BLOCK_SIZE)
+T();		if (block->size - total_bytes > MIN_BLOCK_SIZE)
 		{
 #if (DEBUG_HEAP)
 			kdebug(DEBUG_DEBUG, FAC_HEAP, "Splitting block %p for %d bytes\n", block, total_bytes);
 #endif
 
-			next = (struct block_t*)((uint8*)block + total_bytes);
+T();			next = (struct block_t*)((uint8*)block + total_bytes);
 			next->size = block->size - total_bytes;
 			next->next = block->next;
 			next->prev = block->prev;
@@ -136,46 +136,46 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 	}
 
 // At this point we know that we are operating on "block".  We've already split (if possible) a free block.
-	if (free_list == block)
+T();	if (free_list == block)
 	{
-		free_list = block->next;
+T();		free_list = block->next;
 		ASSERT_HEAP(free_list);
 	}
 
-	result = (void*)((uint8*)block + sizeof(struct block_t));
+T();	result = (void*)((uint8*)block + sizeof(struct block_t));
 	ASSERT((uint32)result % HEAP_ALLOC_GRANULARITY == 0);
 
 // Fill user memory.
 	memset(result, MALLOC_FILL, req_bytes);
 
 // FIll our guard bytes (so we can detect over-run / under-run later).
-	rear_guard = rear_guard_ptr(block);
+T();	rear_guard = rear_guard_ptr(block);
 	for (i = HEAP_ALLOC_GRANULARITY; i; *rear_guard = MALLOC_GUARD_MAGIC, rear_guard++, i -= 4);
 	block->guard = MALLOC_GUARD_MAGIC;
 
 // Place "block" into the alloc list.
 	if (!alloc_list)
 	{
-		block->next = NULL;
+T();		block->next = NULL;
 		block->prev = NULL;
 		alloc_list = block;
 	}
 	else
 	{
-		struct block_t *node;
+T();		struct block_t *node;
 
-		// Stop when we found the alloc'd item that is just past out current one.
+		// Stop when we found the alloc'd item that is just past our current one.
 		for (node = alloc_list; node->next; node = node->next)
 		{
 			if ((node < block) && (node->next > block))
 			{
-				break;
+T();				break;
 			}
 		}
 
-		if (node)
+T();		if (node)
 		{
-			block->next = node->next;
+T();			block->next = node->next;
 			block->prev = node;
 
 			node->next = block;
@@ -202,8 +202,7 @@ void	*__kmalloc(uint32 bytes, uint32 flags)
 	kdebug(DEBUG_DEBUG, FAC_HEAP, "heap-replay: replay_list[%d] = kmalloc(%d,%d);\n", block->seq_id, bytes, flags);
 #endif
 
-	spinlock_release(&heap_lock);
-
+T();	spinlock_release(&heap_lock);
 
 	return result;
 }
