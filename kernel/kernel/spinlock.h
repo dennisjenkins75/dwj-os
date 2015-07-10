@@ -8,7 +8,7 @@
 typedef struct	spinlock
 {
 	int	lock;			// Holds actual lock flag.
-	char	*name;			// optional, for debugging.
+	char	*name;			// optional, for debugging, in .rodata.
 } spinlock;
 
 // Usage: spinlock xyz_lock = INIT_SPINLOCK("xyz");
