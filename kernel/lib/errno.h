@@ -23,3 +23,4 @@
 #define ENOTIMPL	ENOSYS	/* feature not implemented */
 #define EWAIT_ABANDONED	99	/* Owner of a wait object killed while holding object.
 				   This value is returned from obj_wait() or obj_wait_many(). */
+#define EBADPATH	100	/* Pathname component invalid. */

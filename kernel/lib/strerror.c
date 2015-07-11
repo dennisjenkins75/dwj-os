@@ -48,6 +48,9 @@ const char* strerror(int error)
 	{
 		case EWAIT_ABANDONED:
 			return "EWAIT_ABANDONED";
+
+		case EBADPATH:
+			return "EBADPATH";
 	}
 
 	return "??";
