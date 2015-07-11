@@ -41,6 +41,67 @@ int	vfs_vnode_free(struct vnode *vnode)
 	return -EINVAL;
 }
 
+
+// Give a pathname (possibly containing multiple directories), and
+// a starting vnode (vn_in), descend down the path one level.
+// Sets vn_out to vnode for the first path component (up to NULL or '/'),
+// Sets nextpath to pointer to remainder of the pathname.
+// Returns <0 on error, 0 or more is count of '/' left in nextpath.
+
+int	vfs_vnode_descend (
+	const char *pathname,		// in
+	struct vnode *vn_in,		// in
+	const char **nextpath,		// out (points into 'pathname')
+	struct vnode **vn_out		// out
+) {
+	if (!pathname || !vn_in || !vn_out || !nextpath) {
+		return -EINVAL;
+	}
+
+	if (!(vn_in->mode & S_IFDIR)) {
+		return -ENOTDIR;
+	}
+
+	*vn_out = NULL;
+	*nextpath = NULL;
+
+// Determine if 'pathname' contains a path seperator ('/')
+	char	tmpname[MAX_FNAME_LEN + 1];
+	char	*t = tmpname;
+	int	i = 0;
+
+	for (i = 0; (i < MAX_FNAME_LEN) && *pathname && (*pathname != '/'); i++) {
+		*(t++) = *(pathname++);
+	}
+	*t = 0;
+
+	if (i >= MAX_FNAME_LEN) {
+		return -EBADPATH;
+	}
+
+	if (*pathname == '/') {
+		*nextpath = ++pathname;
+	}
+
+// Need to search 'vn_in' (a directory) for 'tmpname' and obtain 'tmpname's vnode.
+T();	if (NULL == vn_in->vfs_ops->find) {
+		return -ENOTIMPL;
+	}
+
+T();	if (0 > (i = vn_in->vfs_ops->find (vn_in, tmpname, vn_out))) {
+		return i;
+	}
+
+// Return count number of '/' remaining.
+	i = 0;
+T();	for (const char *p = *nextpath; *p; ++p) {
+		i += (*p == '/');
+	}
+
+T();	return i;
+}
+
+
 // Returns vnode for a given fully qualified pathname.
 // Returns error code if not found.
 int	vfs_vnode_find(const char *name, struct vnode **vn)
@@ -74,7 +135,7 @@ int	vfs_vnode_find(const char *name, struct vnode **vn)
 		return -EINVAL;
 	}
 
-	tvn1 = fs_root->root;
+	tvn1 = fs_root->v_root;
 	tvn2 = NULL;
 
 	do

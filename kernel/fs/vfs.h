@@ -20,6 +20,9 @@ typedef unsigned int mode_t;
 // Bit-flags for "vfs_ops->flags"
 #define VFS_NEED_DEV	1
 
+// Max length of a file-system object name.
+#define MAX_FNAME_LEN	255
+
 struct statvfs
 {
 	uint64		total_blocks;
@@ -55,6 +58,7 @@ struct vfs_ops
 	int	(*fstat)(struct vnode *vn, struct stat *statbuf);
 	int	(*readdir)(struct vnode *vn, struct dirent *dir, unsigned int count);
 	int	(*mount)(struct vnode *vn, struct fs_mount *mount, const char *ops);
+	int	(*mkdir)(struct vnode *vn, const char *fname, int flags, int mode);
 
 	int	(*find)(struct vnode *vn, const char *name, struct vnode **result);
 };
@@ -100,9 +104,9 @@ typedef struct fs_mount
 {
 	struct fs_type		*fs_type;
 	struct dentry		*d_root;
-	struct vnode		*root;		// vnode for root of this mount.
-	struct vnode		*old;		// old copy of vnode for mount point.
-	struct vnode		*src_vn;	// block device for mount source (if any).
+	struct vnode		*v_root;	// vnode for root of this mount.
+	struct vnode		*v_old;		// old copy of vnode for mount point.
+	struct vnode		*v_blkdev;	// block device for mount source (if any).
 	void			*data;
 
 	struct fs_mount		*next;
@@ -141,6 +145,10 @@ int	vfs_vnode_free(struct vnode *vn);
 // Resolve the name into a vnode.  Increments ref_count of vnode.
 // returns '0' in success or error code on error.
 int	vfs_vnode_find(const char *name, struct vnode **vn);
+
+// Given a pathname and starting vnode, descend one directory level.
+// Return resulting vnode and pointer to what is left of the path component.
+int	vfs_vnode_descend (const char *pathname, struct vnode *vn_in, const char **nextpath, struct vnode **vn_out);
 
 // Displays contents of vnode, as a debugging aid.
 void	vfs_vnode_debug (struct vnode *vn, const char *extra);

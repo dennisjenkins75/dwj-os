@@ -72,9 +72,9 @@ T();	if (NULL == (mount = (struct fs_mount*)kmalloc(sizeof(*mount), HEAP_FAILOK)
 
 T();	mount->fs_type = fs_type;
 	mount->d_root = dentry;		// root directory of this mount point.
-	mount->root = NULL;		// Filled in shortly.
-	mount->old = NULL;		// Filled in shortly.
-	mount->src_vn = src_vn;
+	mount->v_root = NULL;		// Filled in shortly.
+	mount->v_old = NULL;		// Filled in shortly.
+	mount->v_blkdev = src_vn;
 	mount->data = NULL;
 	mount->next = mount;
 	mount->prev = mount;
@@ -98,8 +98,8 @@ T();		root_vn = mnt_vn;
 		}
 	}
 
-T();	mount->root = root_vn;
-	mount->old = mnt_vn;
+T();	mount->v_root = root_vn;
+	mount->v_old = mnt_vn;
 
 T();	if (fs_type->vfs_ops->mount)
 	{
