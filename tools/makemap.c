@@ -27,6 +27,7 @@ int	main(int argc, char *argv[])
 
 	for (count = 0; symbols[count].name; count++);
 	hdr.magic = VAST_MAGIC;
+	hdr.padding0 = 0;
 	hdr.count = count;
 
 	array = (struct vast_addr_t*)malloc(count * sizeof(struct vast_addr_t));

@@ -5,6 +5,7 @@
 struct	vast_hdr_t
 {
 	uint32		magic;		// 'VAST' - Virtual address symbol table.
+	uint32		padding0;	// Padding, to NULL terminate 'magic'.
 	uint32		count;		// # of entries.
 };
 
