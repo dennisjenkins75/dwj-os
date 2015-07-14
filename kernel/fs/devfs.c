@@ -3,18 +3,6 @@
 #include "kernel/kernel.h"
 
 
-int	devfs_statvfs(struct vnode *vn, struct statvfs *statvfs)
-{
-	return -ENOTIMPL;
-}
-
-/*
-int	devfs_namei(struct vnode *vn, const char *path, int *inode)
-{
-	return -ENOTIMPL;
-}
-*/
-
 int	devfs_open(struct vnode *vn, const char *fname, int flags, int mode)
 {
 	return -ENOTIMPL;
@@ -52,8 +40,6 @@ int     devfs_readdir(struct vnode *vn, struct dirent *dir, unsigned int count)
 
 static struct vfs_ops devfs_ops =
 {
-	.statvfs = devfs_statvfs,
-//	.namei = devfs_namei,
 	.open = devfs_open,
 	.close = devfs_close,
 	.read = devfs_read,

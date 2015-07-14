@@ -23,13 +23,6 @@ typedef unsigned int mode_t;
 // Max length of a file-system object name.
 #define MAX_FNAME_LEN	255
 
-struct statvfs
-{
-	uint64		total_blocks;
-	uint64		free_blocks;
-	uint32		block_size;
-};
-
 struct stat
 {
 	off64_t		st_size;
@@ -45,10 +38,6 @@ struct dirent
 struct vfs_ops
 {
 	int	flags;
-	int	(*statvfs)(struct vnode *vn, struct statvfs *statvfs);
-//	int	(*namei)(struct vnode *vn, const char *path, inode_t *inode_num);
-//	int	(*geti)(struct fs_mount *mnt, inode_t inode_num, struct vnode *vn);
-//	int	(*puti)(struct fs_mount *mnt, inode_t inode_num, struct vnode *vn);
 	int	(*open)(struct vnode *vn, const char *fname, int flags, int mode);
 	int	(*close)(struct vnode *vn);
 	ssize_t	(*read)(struct vnode *vn, void *buffer, size_t count, off64_t offset);
