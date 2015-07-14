@@ -30,7 +30,7 @@ T();	if (NULL == (fs_type = vfs_find_fs(type)))
 		return -ENODEV;
 	}
 
-T();	if ((fs_type->vfs_ops->flags & VFS_NEED_DEV) && !src)
+T();	if ((fs_type->vnode_ops->flags & VFS_NEED_DEV) && !src)
 	{
 		result = -EINVAL;
 		goto error;
@@ -101,9 +101,9 @@ T();		root_vn = mnt_vn;
 T();	mount->v_root = root_vn;
 	mount->v_old = mnt_vn;
 
-T();	if (fs_type->vfs_ops->mount)
+T();	if (fs_type->vnode_ops->mount)
 	{
-		if (0 > (result = fs_type->vfs_ops->mount(src_vn, mount, opts)))
+		if (0 > (result = fs_type->vnode_ops->mount(src_vn, mount, opts)))
 		{
 			goto error;
 		}

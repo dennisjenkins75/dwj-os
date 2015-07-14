@@ -6,7 +6,7 @@
 
 #include "kernel/kernel/kernel.h"
 
-static struct vfs_ops ramfs_ops;
+static struct vnode_ops ramfs_vnode_ops;
 
 int	ramfs_mount(struct vnode *vn, struct fs_mount *mount, const char *ops)
 {
@@ -35,7 +35,7 @@ int	ramfs_find (struct vnode *vn, const char *name, struct vnode **result)
 	PANIC3 ("ramfs_find (%p, %s) not implemented!\n", vn, name);
 }
 
-static struct vfs_ops ramfs_ops =
+static struct vnode_ops ramfs_vnode_ops =
 {
 	.flags = 0,
 	.mount = ramfs_mount,
@@ -46,5 +46,5 @@ static struct vfs_ops ramfs_ops =
 
 void	ramfs_init(void)
 {
-	vfs_register_fs("ramfs", &ramfs_ops);
+	vfs_register_fs("ramfs", &ramfs_vnode_ops);
 }

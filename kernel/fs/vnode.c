@@ -11,7 +11,7 @@ T();	ASSERT (vnode_new);
 T();	ASSERT (NULL == *vnode_new);
 T();	ASSERT (mount);
 T();	ASSERT (mount->fs_type);
-T();	ASSERT (mount->fs_type->vfs_ops);
+T();	ASSERT (mount->fs_type->vnode_ops);
 	// parent may be NULL.
 
 T();	if (NULL == (vn = kmalloc(sizeof(struct vnode), HEAP_FAILOK))) {
@@ -25,7 +25,7 @@ T();	if (NULL == (vn = kmalloc(sizeof(struct vnode), HEAP_FAILOK))) {
 	vn->blocks = 0;
 	vn->inode_num = -1;
 	vn->ref_count = 1;
-T();	vn->vfs_ops = mount->fs_type->vfs_ops;
+T();	vn->vnode_ops = mount->fs_type->vnode_ops;
 	vn->mount = mount;
 	vn->private_data = NULL;
 T();	spinlock_init (&(vn->v_lock), "vnode");
@@ -84,11 +84,11 @@ int	vfs_vnode_descend (
 	}
 
 // Need to search 'vn_in' (a directory) for 'tmpname' and obtain 'tmpname's vnode.
-T();	if (NULL == vn_in->vfs_ops->find) {
+T();	if (NULL == vn_in->vnode_ops->find) {
 		return -ENOTIMPL;
 	}
 
-T();	if (0 > (i = vn_in->vfs_ops->find (vn_in, tmpname, vn_out))) {
+T();	if (0 > (i = vn_in->vnode_ops->find (vn_in, tmpname, vn_out))) {
 		return i;
 	}
 
@@ -163,12 +163,12 @@ T();		if (NULL == (tname = kmalloc(i, HEAP_FAILOK)))
 printf("name = '%s'\n", tname);
 
 // Scan vnode for this file.
-T();		if (NULL == tvn1->mount->fs_type->vfs_ops->find)
+T();		if (NULL == tvn1->mount->fs_type->vnode_ops->find)
 		{
 			return -ENOTIMPL;
 		}
 
-T();		if (0 >= (i = tvn1->mount->fs_type->vfs_ops->find(tvn1, tname, &tvn2)))
+T();		if (0 >= (i = tvn1->mount->fs_type->vnode_ops->find(tvn1, tname, &tvn2)))
 		{
 //			vfs_vnode_free(tvn1); // ???
 			return i;

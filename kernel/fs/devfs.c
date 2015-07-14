@@ -38,7 +38,7 @@ int     devfs_readdir(struct vnode *vn, struct dirent *dir, unsigned int count)
 	return -ENOTIMPL;
 }
 
-static struct vfs_ops devfs_ops =
+static struct vnode_ops devfs_vnode_ops =
 {
 	.open = devfs_open,
 	.close = devfs_close,
@@ -51,5 +51,5 @@ static struct vfs_ops devfs_ops =
 
 void	devfs_init(void)
 {
-	vfs_register_fs("devfs", &devfs_ops);
+	vfs_register_fs("devfs", &devfs_vnode_ops);
 }

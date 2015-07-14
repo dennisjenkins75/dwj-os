@@ -35,7 +35,7 @@ struct dirent
 	inode_t		inode;
 };
 
-struct vfs_ops
+struct vnode_ops
 {
 	int	flags;
 	int	(*open)(struct vnode *vn, const char *fname, int flags, int mode);
@@ -48,7 +48,6 @@ struct vfs_ops
 	int	(*readdir)(struct vnode *vn, struct dirent *dir, unsigned int count);
 	int	(*mount)(struct vnode *vn, struct fs_mount *mount, const char *ops);
 	int	(*mkdir)(struct vnode *vn, const char *fname, int flags, int mode);
-
 	int	(*find)(struct vnode *vn, const char *name, struct vnode **result);
 };
 
@@ -82,7 +81,7 @@ typedef struct vnode
 
 	inode_t			inode_num;
 	int			ref_count;
-	struct vfs_ops		*vfs_ops;	// some file systems (dev) allow each file to have its own ops.
+	const struct vnode_ops	*vnode_ops;	// some file systems (dev) allow each file to have its own ops.
 	struct fs_mount		*mount;
 	void			*private_data;		// per filesystem private data.
 
@@ -91,7 +90,7 @@ typedef struct vnode
 
 typedef struct fs_mount
 {
-	struct fs_type		*fs_type;
+	const struct fs_type	*fs_type;
 	struct dentry		*d_root;
 	struct vnode		*v_root;	// vnode for root of this mount.
 	struct vnode		*v_old;		// old copy of vnode for mount point.
@@ -108,7 +107,7 @@ typedef struct fs_type
 	struct fs_type		*next;
 	struct fs_type		*prev;
 	char			*name;
-	struct vfs_ops		*vfs_ops;
+	const struct vnode_ops	*vnode_ops;
 	int			ref_count;
 } fs_type;
 
@@ -118,7 +117,7 @@ extern struct fs_mount	*fs_root;
 
 /////////////////////////////////////////////////////////////////////////
 // vfs.c
-int	vfs_register_fs(const char *name, struct vfs_ops *ops);
+int	vfs_register_fs(const char *name, const struct vnode_ops *vnode_ops);
 int	vfs_unregister_fs(const char *name);
 struct fs_type* vfs_find_fs(const char *registered_name);
 void	vfs_release_fs(struct fs_type *fs);
