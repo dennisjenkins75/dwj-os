@@ -15,12 +15,15 @@ static struct fs_type	*fs_type_list = NULL;
 struct fs_mount	*fs_root = NULL;
 
 // Insert new fs into linked list of file-systems.
-int	vfs_register_fs(const char *name, const struct vnode_ops *vnode_ops)
-{
+int	vfs_register_fs (
+	const char *name,
+	const struct vnode_ops *vnode_ops,
+	const struct fs_type_ops *fs_type_ops
+) {
 	struct fs_type *fs = NULL;
 	struct fs_type *temp = NULL;
 
-	if (!name || !vnode_ops)
+	if (!name || !vnode_ops || !fs_type_ops)
 	{
 		return -EINVAL;
 	}
@@ -32,6 +35,7 @@ int	vfs_register_fs(const char *name, const struct vnode_ops *vnode_ops)
 
 	fs->name = strdup(name);
 	fs->vnode_ops = vnode_ops;
+	fs->fs_type_ops = fs_type_ops;
 	fs->ref_count = 0;
 	fs->next = fs;
 	fs->prev = fs;

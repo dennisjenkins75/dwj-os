@@ -49,7 +49,10 @@ static struct vnode_ops devfs_vnode_ops =
 	.readdir = devfs_readdir
 };
 
+static struct fs_type_ops devfs_fs_type_ops = {
+};
+
 void	devfs_init(void)
 {
-	vfs_register_fs("devfs", &devfs_vnode_ops);
+	vfs_register_fs("devfs", &devfs_vnode_ops, &devfs_fs_type_ops);
 }

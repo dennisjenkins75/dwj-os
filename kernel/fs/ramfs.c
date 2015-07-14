@@ -8,13 +8,15 @@
 
 static struct vnode_ops ramfs_vnode_ops;
 
-int	ramfs_mount(struct vnode *vn, struct fs_mount *mount, const char *ops)
-{
-	ASSERT(mount);
-	ASSERT(mount->v_root);
-	ASSERT(NULL == mount->data);
-
-T();	return 0;
+int	ramfs_fs_mount (
+	struct fs_type *fs_type,
+	struct blkdev *blkdev,
+	struct vnode *vn,
+	const char *opts,
+	struct fs_mount **fs_mount
+) {
+	PANIC2 ("ramfs_fs_mount(%s) not implemented!\n", fs_type->name);
+	return 0;
 }
 
 int	ramfs_mkdir (struct vnode *vn, const char *fname, int flags, int mode)
@@ -38,13 +40,15 @@ int	ramfs_find (struct vnode *vn, const char *name, struct vnode **result)
 static struct vnode_ops ramfs_vnode_ops =
 {
 	.flags = 0,
-	.mount = ramfs_mount,
-//	.namei = ramfs_namei
 	.mkdir = ramfs_mkdir,
 	.find = ramfs_find,
 };
 
+static struct fs_type_ops ramfs_fs_type_ops = {
+	.mount = ramfs_fs_mount,
+};
+
 void	ramfs_init(void)
 {
-	vfs_register_fs("ramfs", &ramfs_vnode_ops);
+	vfs_register_fs("ramfs", &ramfs_vnode_ops, &ramfs_fs_type_ops);
 }

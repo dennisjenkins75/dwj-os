@@ -1,14 +1,17 @@
 /*	kernel/vfs.h	*/
 
 // Forward declarations.
+struct blkdev;
+struct blkdev_ops;
 struct statvfs;
 struct stat;
 struct dirent;
 struct dentry;
 struct vnode;
-struct vfs_ops;
+struct vnode_ops;
 struct fs_mount;
 struct fs_type;
+struct fs_type_ops;
 
 typedef unsigned long long inode_t;
 
@@ -35,6 +38,21 @@ struct dirent
 	inode_t		inode;
 };
 
+struct blkdev {
+	struct vnode		*vnode;		// Used if mounting a file as a block device.
+	struct blkdev_ops	*blkdev_ops;
+	void			*priv_data;
+};
+
+struct blkdev_ops {
+	int	(*blk_size)(struct blkdev *bd);
+	int	(*blk_total)(struct blkdev *bd);
+	int	(*blk_free)(struct blkdev *bd);
+	int	(*blk_alloc)(struct blkdev *bd, int count);
+	int	(*blk_read)(struct blkdev *bd, int offset, int count, void *buffer);
+	int	(*blk_write)(struct blkdev *bd, int offset, int count, void *buffer);
+};
+
 struct vnode_ops
 {
 	int	flags;
@@ -46,10 +64,15 @@ struct vnode_ops
 	off64_t	(*lseek64)(struct vnode *vn, off64_t offset, int whence);
 	int	(*fstat)(struct vnode *vn, struct stat *statbuf);
 	int	(*readdir)(struct vnode *vn, struct dirent *dir, unsigned int count);
-	int	(*mount)(struct vnode *vn, struct fs_mount *mount, const char *ops);
 	int	(*mkdir)(struct vnode *vn, const char *fname, int flags, int mode);
 	int	(*find)(struct vnode *vn, const char *name, struct vnode **result);
 };
+
+struct fs_type_ops {
+	int	(*mount)(struct fs_type *fs_type, struct blkdev *blkdev, struct vnode *vn, const char *opts, struct fs_mount **fs_mount);
+	int	(*unmount)(struct fs_type *fs_type, struct fs_mount *fs_mount);
+};
+
 
 // "dentry" represents a directory (eg, named) hierarchy of an object in a file-system.
 
@@ -108,6 +131,7 @@ typedef struct fs_type
 	struct fs_type		*prev;
 	char			*name;
 	const struct vnode_ops	*vnode_ops;
+	const struct fs_type_ops	*fs_type_ops;
 	int			ref_count;
 } fs_type;
 
@@ -117,7 +141,11 @@ extern struct fs_mount	*fs_root;
 
 /////////////////////////////////////////////////////////////////////////
 // vfs.c
-int	vfs_register_fs(const char *name, const struct vnode_ops *vnode_ops);
+int	vfs_register_fs (
+	const char *name,
+	const struct vnode_ops *vnode_ops,
+	const struct fs_type_ops *fs_type_ops
+);
 int	vfs_unregister_fs(const char *name);
 struct fs_type* vfs_find_fs(const char *registered_name);
 void	vfs_release_fs(struct fs_type *fs);

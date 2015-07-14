@@ -36,6 +36,12 @@ T();	if ((fs_type->vnode_ops->flags & VFS_NEED_DEV) && !src)
 		goto error;
 	}
 
+T();	if (!fs_type->fs_type_ops->mount) {
+		PANIC2("fs_type (%s) does not implement 'mount' yet.\n", fs_type->name);
+		result = -EINVAL;
+		goto error;
+	}
+
 T();	if (src && src[0])
 	{
 T();		if (0 > (result = vfs_vnode_find(src, &src_vn)))
@@ -64,6 +70,7 @@ T();	if (0 > (result = vfs_vnode_find(mntpoint, &mnt_vn)))
 		PANIC1 ("vfs_mount() not implemented for non-NULL fs_root\n");
 	}
 
+#if 0
 T();	if (NULL == (mount = (struct fs_mount*)kmalloc(sizeof(*mount), HEAP_FAILOK)))
 	{
 		result = -ENOMEM;
@@ -100,13 +107,10 @@ T();		root_vn = mnt_vn;
 
 T();	mount->v_root = root_vn;
 	mount->v_old = mnt_vn;
+#endif
 
-T();	if (fs_type->vnode_ops->mount)
-	{
-		if (0 > (result = fs_type->vnode_ops->mount(src_vn, mount, opts)))
-		{
-			goto error;
-		}
+T();	if (0 > (result = fs_type->fs_type_ops->mount(fs_type, NULL, src_vn, opts, &mount))) {
+		goto error;
 	}
 
 T();	if (fs_root)
